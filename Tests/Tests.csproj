@@ -35,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -58,11 +62,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IISHostingServicesTests\CategoriesServiceTests.cs" />
     <Compile Include="IISHostingServicesTests\OrdersServiceTests.cs" />
+    <Compile Include="RestServiceTests\OrdersServiceTests.cs" />
     <Compile Include="SelfHostingServiceTests\CategoriesServiceTests.cs" />
     <Compile Include="SelfHostingServiceTests\OrdersServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WCFServices.Cotracts\WCFServices.Cotracts.csproj">
