@@ -16,7 +16,7 @@
     using WCFServices.DataContracts;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
-    public class OrdersService : IOrdersService, IOrdersSubscriptionService
+    public class OrdersService : IOrdersService, IOrdersSubscriptionService, IRestOrdersService
     {
         private static readonly ConcurrentDictionary<string, IBroadcastCallback> Callbacks = new ConcurrentDictionary<string, IBroadcastCallback>();
         private readonly OrdersDataService ordersDataService;
@@ -44,6 +44,15 @@
             var result = Mapper.Map<Order, OrderDTO>(orderById);
 
             return result;
+        }
+
+        public OrderDTO GetById(string id)
+        {
+            int orderId = 0;
+
+            int.TryParse(id, out orderId);
+
+            return this.GetById(orderId);
         }
 
         public int CreateNewOrder(OrderDTO order)
