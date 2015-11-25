@@ -4,7 +4,9 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.ServiceModel;
+    using System.ServiceModel.Web;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -52,7 +54,14 @@
 
             int.TryParse(id, out orderId);
 
-            return this.GetById(orderId);
+            try
+            {
+                return this.GetById(orderId);
+            }
+            catch (EntityNotFoundException exception)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
         }
 
         public int CreateNewOrder(OrderDTO order)
@@ -173,6 +182,15 @@
             {
                 throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
             }
+        }
+
+        public int DeleteOrder(string id)
+        {
+            int orderId = 0;
+
+            int.TryParse(id, out orderId);
+
+            return this.DeleteOrder(orderId);
         }
 
         public void SimulateLongRunningOperation(byte delayInSeconds)

@@ -3,7 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.ServiceModel;
+    using System.ServiceModel.Description;
+    using System.ServiceModel.Web;
+    using WCFServices.Cotracts;
     using WCFServices.HostConfigurationFactory;
+    using WCFServices.OrdersService;
 
     internal static class ServiceHostsFactory
     {
@@ -22,7 +26,8 @@
             return new List<ServiceHost>
                        {
                            GetOrdersServiceHost(),
-                           GetCategoriesServiceHost()
+                           GetCategoriesServiceHost(),
+                           GetWebServiceHostForOrdersService()
                        };
         }
 
@@ -42,6 +47,19 @@
             return new CategoriesServiceHostConfigurationBuilder(categoriesServiceBaseAddress)
                         .AddNetTcpEndpoint("net.tcp://epruizhw0228:810/NorthwindWCFServices/CategoriesService")
                         .Configure();
+        }
+
+        private static ServiceHost GetWebServiceHostForOrdersService()
+        {
+            var ordersServiceBaseAddress = new Uri("http://epruizhw0228:8733/Design_Time_Addresses/NorthwindWCFServices/OrdersService/");
+
+            var host = new WebServiceHost(typeof(OrdersService), ordersServiceBaseAddress);
+
+            var serviceEndpoint = host.AddServiceEndpoint(typeof(IRestOrdersService), new WebHttpBinding(), "rest");
+
+            serviceEndpoint.Behaviors.Add(new WebHttpBehavior { HelpEnabled = true, DefaultOutgoingResponseFormat = WebMessageFormat.Json });
+
+            return host;
         }
     }
 }
