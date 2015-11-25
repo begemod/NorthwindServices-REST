@@ -44,6 +44,16 @@
             }
         }
 
+        protected void GetByIdFaultTest(string endpointConfigurationName)
+        {
+            using (var channel = new ChannelFactory<IOrdersServiceChannel>(endpointConfigurationName))
+            {
+                var client = channel.CreateChannel();
+
+                client.GetById(0);
+            }
+        }
+
         protected void CreateNewOrderFaultTest(string endpointConfigurationName)
         {
             using (var channel = new ChannelFactory<IOrdersServiceChannel>(endpointConfigurationName))

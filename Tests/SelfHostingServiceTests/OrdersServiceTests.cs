@@ -27,6 +27,14 @@
 
         [TestMethod]
         [ExpectedException(typeof(FaultException))]
+        public void GetByIdFaultTest()
+        {
+            this.GetByIdFaultTest(BasicHttpBindingIOrdersService);
+            this.GetByIdFaultTest(NetTcpBindingIOrdersService);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FaultException))]
         public void CreateNewOrderFaultTest()
         {
             this.CreateNewOrderFaultTest(BasicHttpBindingIOrdersService);
