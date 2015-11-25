@@ -29,7 +29,8 @@
 
         protected void GetByIdTest(string baseAddress)
         {
-            var orders = this.GetAllOrders<IEnumerable<OrderDTO>>(baseAddress);
+            var orders = this.GetAllOrders(baseAddress)
+                             .Deserialize<IEnumerable<OrderDTO>>();
 
             var orderId = orders.First().OrderId;
 
@@ -37,18 +38,6 @@
 
             Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
-        }
-
-        private static T GetDeserializedData<T>(IRestResponse response)
-        {
-            return JsonConvert.DeserializeObject<T>(response.Content);
-        }
-
-        private T GetAllOrders<T>(string baseAddress)
-        {
-            var response = this.GetAllOrders(baseAddress);
-
-            return GetDeserializedData<T>(response);
         }
 
         private IRestResponse GetOrderById(string baseAddress, string orderId)
@@ -69,6 +58,14 @@
             var request = new RestRequest("orders", Method.GET);
 
             return client.Execute(request);
+        }
+    }
+
+    internal static class RestResponseExtensions
+    {
+        public static T Deserialize<T>(this IRestResponse response)
+        {
+            return JsonConvert.DeserializeObject<T>(response.Content);
         }
     }
 }
