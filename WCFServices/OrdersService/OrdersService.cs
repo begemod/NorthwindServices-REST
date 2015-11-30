@@ -10,61 +10,33 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
-    using DAL.DataServices;
     using DAL.Entities;
     using DAL.Infrastructure;
     using WCFServices.Cotracts;
-    using WCFServices.Cotracts.DataContracts;
     using WCFServices.DataContracts;
     using WCFServices.Infrastructure;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
-    public class OrdersService : IOrdersService, IOrdersSubscriptionService, IRestOrdersService
+    public class OrdersService : BaseOrdersService, IOrdersService, IOrdersSubscriptionService
     {
         private static readonly ConcurrentDictionary<string, IBroadcastCallback> Callbacks = new ConcurrentDictionary<string, IBroadcastCallback>();
-        private readonly OrdersDataService ordersDataService;
-
-        public OrdersService()
-        {
-            var connectionFactory = new NortwindDbConnectionFactory();
-            this.ordersDataService = new OrdersDataService(connectionFactory);
-
-            this.ConfigureInMapping();
-            this.ConfigureOutMapping();
-        }
 
         #region IOrdersService members
 
         public IEnumerable<OrderDTO> GetAll()
         {
-            return this.ordersDataService.GetAll().Select(Mapper.Map<Order, OrderDTO>);
+            return this.GetAllOrders();
         }
 
         public OrderDTO GetById(int orderId)
         {
             try
             {
-                return this.GetByIdInternal(orderId);
+                return this.GetOrderById(orderId);
             }
             catch (EntityNotFoundException exception)
             {
                 throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
-            }
-        }
-
-        public OrderDTO GetById(string id)
-        {
-            int orderId = 0;
-
-            int.TryParse(id, out orderId);
-
-            try
-            {
-                return this.GetByIdInternal(orderId);
-            }
-            catch (EntityNotFoundException)
-            {
-                throw new WebFaultException(HttpStatusCode.NotFound);
             }
         }
 
@@ -78,7 +50,7 @@
             order.OrderDate = null;
             order.ShippedDate = null;
 
-            var orderId = this.ordersDataService.InsertOrder(Mapper.Map<OrderDTO, Order>(order));
+            var orderId = DataService.InsertOrder(Mapper.Map<OrderDTO, Order>(order));
 
             return orderId;
         }
@@ -94,7 +66,7 @@
             {
                 var orderBO = Mapper.Map<OrderDTO, Order>(order);
 
-                var sourceOrder = this.ordersDataService.GetById(order.OrderId);
+                var sourceOrder = DataService.GetById(order.OrderId);
 
                 if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
                 {
@@ -106,7 +78,7 @@
                 orderBO.OrderDate = sourceOrder.OrderDate;
                 orderBO.ShippedDate = sourceOrder.ShippedDate;
 
-                this.ordersDataService.UpdateOrder(orderBO);
+                DataService.UpdateOrder(orderBO);
             }
             catch (EntityNotFoundException exception)
             {
@@ -118,7 +90,7 @@
         {
             try
             {
-                var sourceOrder = this.ordersDataService.GetById(orderId);
+                var sourceOrder = DataService.GetById(orderId);
 
                 if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
                 {
@@ -134,7 +106,7 @@
 
                 sourceOrder.OrderDate = orderDate;
 
-                this.ordersDataService.UpdateOrder(sourceOrder);
+                DataService.UpdateOrder(sourceOrder);
 
                 // raise on order status changed event
                 this.OnOrderStatusChanged(orderId);
@@ -149,7 +121,7 @@
         {
             try
             {
-                var sourceOrder = this.ordersDataService.GetById(orderId);
+                var sourceOrder = DataService.GetById(orderId);
 
                 if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.InWork))
                 {
@@ -158,7 +130,7 @@
 
                 sourceOrder.ShippedDate = DateTime.Now;
 
-                this.ordersDataService.UpdateOrder(sourceOrder);
+                DataService.UpdateOrder(sourceOrder);
 
                 // raise on order status changed event
                 this.OnOrderStatusChanged(orderId);
@@ -173,7 +145,7 @@
         {
             try
             {
-                return this.DeleteOrderInternal(orderId);
+                return this.DeleteOrderById(orderId);
             }
             catch (BusinessException exception)
             {
@@ -182,26 +154,6 @@
             catch (EntityNotFoundException exception)
             {
                 throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
-            }
-        }
-
-        public int DeleteOrder(string id)
-        {
-            int orderId = 0;
-
-            int.TryParse(id, out orderId);
-
-            try
-            {
-                return this.DeleteOrderInternal(orderId);
-            }
-            catch (BusinessException)
-            {
-                throw new WebFaultException(HttpStatusCode.InternalServerError);
-            }
-            catch (EntityNotFoundException)
-            {
-                throw new WebFaultException(HttpStatusCode.NotFound);
             }
         }
 
@@ -276,44 +228,6 @@
                         }
                     }
                 });
-        }
-
-        private OrderDTO GetByIdInternal(int orderId)
-        {
-            var orderById = this.ordersDataService.GetById(orderId);
-
-            var result = Mapper.Map<Order, OrderDTO>(orderById);
-
-            return result;
-        }
-
-        private int DeleteOrderInternal(int orderId)
-        {
-            var orderById = this.GetById(orderId);
-
-            if (orderById.OrderState.Equals(OrderState.Closed))
-            {
-                throw new BusinessException("The order in Closed state can not be deleted.");
-            }
-
-            return this.ordersDataService.DeleteOrder(orderId);
-        }
-
-        private void ConfigureInMapping()
-        {
-            Mapper.CreateMap<OrderDTO, Order>();
-            Mapper.CreateMap<OrderDetailDTO, OrderDetail>();
-            Mapper.CreateMap<ProductDTO, Product>();
-        }
-
-        private void ConfigureOutMapping()
-        {
-            Mapper.CreateMap<Order, OrderDTO>().ForMember(
-                d => d.OrderState,
-                o => o.MapFrom(src => src.OrderDate == null ? OrderState.New : src.ShippedDate == null ? OrderState.InWork : OrderState.Closed));
-
-            Mapper.CreateMap<OrderDetail, OrderDetailDTO>();
-            Mapper.CreateMap<Product, ProductDTO>();
         }
     }
 }
