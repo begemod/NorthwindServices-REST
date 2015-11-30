@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CategoriesService\CategoriesService.cs" />
+    <Compile Include="Infrastructure\BusinessException.cs" />
     <Compile Include="OrdersService\OrdersService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

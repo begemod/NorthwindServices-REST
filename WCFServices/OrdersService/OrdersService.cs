@@ -16,6 +16,7 @@
     using WCFServices.Cotracts;
     using WCFServices.Cotracts.DataContracts;
     using WCFServices.DataContracts;
+    using WCFServices.Infrastructure;
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
     public class OrdersService : IOrdersService, IOrdersSubscriptionService, IRestOrdersService
@@ -41,11 +42,14 @@
 
         public OrderDTO GetById(int orderId)
         {
-            var orderById = this.ordersDataService.GetById(orderId);
-
-            var result = Mapper.Map<Order, OrderDTO>(orderById);
-
-            return result;
+            try
+            {
+                return this.GetByIdInternal(orderId);
+            }
+            catch (EntityNotFoundException exception)
+            {
+                throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
+            }
         }
 
         public OrderDTO GetById(string id)
@@ -56,9 +60,9 @@
 
             try
             {
-                return this.GetById(orderId);
+                return this.GetByIdInternal(orderId);
             }
-            catch (EntityNotFoundException exception)
+            catch (EntityNotFoundException)
             {
                 throw new WebFaultException(HttpStatusCode.NotFound);
             }
@@ -169,14 +173,11 @@
         {
             try
             {
-                var orderById = this.GetById(orderId);
-
-                if (orderById.OrderState.Equals(OrderState.Closed))
-                {
-                    throw new FaultException(new FaultReason("The order in Closed state can not be deleted."), new FaultCode("Error"));
-                }
-
-                return this.ordersDataService.DeleteOrder(orderId);
+                return this.DeleteOrderInternal(orderId);
+            }
+            catch (BusinessException exception)
+            {
+                throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
             }
             catch (EntityNotFoundException exception)
             {
@@ -190,7 +191,18 @@
 
             int.TryParse(id, out orderId);
 
-            return this.DeleteOrder(orderId);
+            try
+            {
+                return this.DeleteOrderInternal(orderId);
+            }
+            catch (BusinessException)
+            {
+                throw new WebFaultException(HttpStatusCode.InternalServerError);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
         }
 
         public void SimulateLongRunningOperation(byte delayInSeconds)
@@ -264,6 +276,27 @@
                         }
                     }
                 });
+        }
+
+        private OrderDTO GetByIdInternal(int orderId)
+        {
+            var orderById = this.ordersDataService.GetById(orderId);
+
+            var result = Mapper.Map<Order, OrderDTO>(orderById);
+
+            return result;
+        }
+
+        private int DeleteOrderInternal(int orderId)
+        {
+            var orderById = this.GetById(orderId);
+
+            if (orderById.OrderState.Equals(OrderState.Closed))
+            {
+                throw new BusinessException("The order in Closed state can not be deleted.");
+            }
+
+            return this.ordersDataService.DeleteOrder(orderId);
         }
 
         private void ConfigureInMapping()

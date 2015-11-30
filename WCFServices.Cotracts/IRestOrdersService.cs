@@ -13,5 +13,8 @@
 
         [WebGet(UriTemplate = "orders/{id}")]
         OrderDTO GetById(string id);
+
+        [WebInvoke(UriTemplate = "orders/{id}", Method = "DELETE")]
+        int DeleteOrder(string id);
     }
 }

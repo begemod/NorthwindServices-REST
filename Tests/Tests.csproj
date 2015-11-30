@@ -64,10 +64,11 @@
     <Compile Include="BaseTests\BaseCategoriesServiceTests.cs" />
     <Compile Include="BaseTests\BaseOrdersServiceTests.cs" />
     <Compile Include="RESTServicesTests\BaseRESTOrdersServiceTests.cs" />
-    <Compile Include="RESTServicesTests\RESTOrdersServiceTests.cs" />
+    <Compile Include="RESTServicesTests\OrdersServiceTestsIISHosting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IISHostingServicesTests\CategoriesServiceTests.cs" />
     <Compile Include="IISHostingServicesTests\OrdersServiceTests.cs" />
+    <Compile Include="RESTServicesTests\OrdersServiceTestsSelfHosting.cs" />
     <Compile Include="SelfHostingServiceTests\CategoriesServiceTests.cs" />
     <Compile Include="SelfHostingServiceTests\OrdersServiceTests.cs" />
   </ItemGroup>

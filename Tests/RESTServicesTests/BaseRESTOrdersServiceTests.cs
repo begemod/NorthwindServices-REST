@@ -11,6 +11,8 @@
 
     public class BaseRestOrdersServiceTests
     {
+        #region Tests
+
         protected void GetAllTest(string baseAddress)
         {
             var response = this.GetAllOrders(baseAddress);
@@ -40,6 +42,10 @@
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
         }
 
+        #endregion
+
+        #region Private methods
+
         private IRestResponse GetOrderById(string baseAddress, string orderId)
         {
             var client = new RestClient(baseAddress);
@@ -59,6 +65,8 @@
 
             return client.Execute(request);
         }
+
+        #endregion
     }
 
     internal static class RestResponseExtensions
