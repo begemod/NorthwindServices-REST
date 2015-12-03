@@ -4,9 +4,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
     using System.ServiceModel;
-    using System.ServiceModel.Web;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -42,43 +40,25 @@
 
         public int CreateNewOrder(OrderDTO order)
         {
-            if (order == null)
+            try
             {
-                throw new FaultException(new FaultReason("Order should be defined."), new FaultCode("Error"));
+                return this.Create(order);
             }
-
-            order.OrderDate = null;
-            order.ShippedDate = null;
-
-            var orderId = DataService.InsertOrder(Mapper.Map<OrderDTO, Order>(order));
-
-            return orderId;
+            catch (BusinessException exception)
+            {
+                throw new FaultException(exception.Message, new FaultCode("Error"));
+            }
         }
 
         public void UpdateOrder(OrderDTO order)
         {
-            if (order == null)
-            {
-                throw new FaultException(new FaultReason("Order should be defined."), new FaultCode("Error"));
-            }
-
             try
             {
-                var orderBO = Mapper.Map<OrderDTO, Order>(order);
-
-                var sourceOrder = DataService.GetById(order.OrderId);
-
-                if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
-                {
-                    throw new FaultException(new FaultReason("Only Order in New status can be modified."), new FaultCode("Error"));
-                }
-
-                // fields OrderDate and ShippedDate can not be modified directly
-                // so restore these fields from source object
-                orderBO.OrderDate = sourceOrder.OrderDate;
-                orderBO.ShippedDate = sourceOrder.ShippedDate;
-
-                DataService.UpdateOrder(orderBO);
+                this.Update(order);
+            }
+            catch (BusinessException exception)
+            {
+                throw new FaultException(exception.Message, new FaultCode("Error"));
             }
             catch (EntityNotFoundException exception)
             {
@@ -145,7 +125,7 @@
         {
             try
             {
-                return this.DeleteOrderById(orderId);
+                return this.Delete(orderId);
             }
             catch (BusinessException exception)
             {

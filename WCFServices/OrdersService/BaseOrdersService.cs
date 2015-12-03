@@ -2,6 +2,8 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.ServiceModel;
+
     using AutoMapper;
     using DAL.DataServices;
     using DAL.Entities;
@@ -48,7 +50,7 @@
             return result;
         }
 
-        protected int DeleteOrderById(int orderId)
+        protected int Delete(int orderId)
         {
             var orderById = this.GetOrderById(orderId);
 
@@ -58,6 +60,45 @@
             }
 
             return this.DataService.DeleteOrder(orderId);
+        }
+
+        protected int Create(OrderDTO order)
+        {
+            if (order == null)
+            {
+                throw new BusinessException("Order should be defined.");
+            }
+
+            order.OrderDate = null;
+            order.ShippedDate = null;
+
+            var orderId = this.DataService.InsertOrder(Mapper.Map<OrderDTO, Order>(order));
+
+            return orderId;
+        }
+
+        protected void Update(OrderDTO order)
+        {
+            if (order == null)
+            {
+                throw new BusinessException("Order should be defined.");
+            }
+
+            var orderEntity = Mapper.Map<OrderDTO, Order>(order);
+
+            var sourceOrder = this.DataService.GetById(order.OrderId);
+
+            if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
+            {
+                throw new BusinessException("Only Order in New status can be modified.");
+            }
+
+            // fields OrderDate and ShippedDate can not be modified directly
+            // so restore these fields from source object
+            orderEntity.OrderDate = sourceOrder.OrderDate;
+            orderEntity.ShippedDate = sourceOrder.ShippedDate;
+
+            this.DataService.UpdateOrder(orderEntity);
         }
 
         #region Setup mapping

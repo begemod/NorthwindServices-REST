@@ -5,24 +5,27 @@
     [TestClass]
     public class OrdersServiceTestsSelfHosting : BaseRestOrdersServiceTests
     {
-        private const string OrdersServiceBaseAddressSH = "http://epruizhw0228:8733/Design_Time_Addresses/NorthwindWCFServices/OrdersService/rest";
+        public OrdersServiceTestsSelfHosting()
+        {
+            this.BaseServiceAddress = "http://epruizhw0228:8733/Design_Time_Addresses/NorthwindWCFServices/OrdersService/rest";
+        }
 
         [TestMethod]
         public void GetAllTest()
         {
-            this.GetAllTest(OrdersServiceBaseAddressSH);
+            this.BaseGetAllTest();
         }
 
         [TestMethod]
         public void GetByIdFaultTest()
         {
-            this.GetByIdFaultTest(OrdersServiceBaseAddressSH);
+            this.BaseGetByIdFaultTest();
         }
 
         [TestMethod]
         public void GetByIdTest()
         {
-            this.GetByIdTest(OrdersServiceBaseAddressSH);
+            this.BaseGetByIdTest();
         }
     }
 }

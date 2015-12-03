@@ -39,7 +39,35 @@
 
             try
             {
-                return this.DeleteOrderById(orderId);
+                return this.Delete(orderId);
+            }
+            catch (BusinessException)
+            {
+                throw new WebFaultException(HttpStatusCode.InternalServerError);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
+        }
+
+        public int CreateNewOrder(OrderDTO order)
+        {
+            try
+            {
+                return this.Create(order);
+            }
+            catch (BusinessException)
+            {
+                throw new WebFaultException(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public void UpdateOrder(OrderDTO order)
+        {
+            try
+            {
+                this.Update(order);
             }
             catch (BusinessException)
             {

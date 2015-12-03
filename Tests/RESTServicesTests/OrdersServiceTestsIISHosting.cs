@@ -5,24 +5,27 @@
     [TestClass]
     public class OrdersServiceTestsIISHosting : BaseRestOrdersServiceTests
     {
-        private const string OrdersServiceBaseAddressIIS = "http://localhost/NorthwindWCFServices/OrdersServiceREST.svc/";
+        public OrdersServiceTestsIISHosting()
+        {
+            this.BaseServiceAddress = "http://localhost/NorthwindWCFServices/OrdersServiceREST.svc/";
+        }
 
         [TestMethod]
         public void GetAllTest()
         {
-            this.GetAllTest(OrdersServiceBaseAddressIIS);
+            this.BaseGetAllTest();
         }
 
         [TestMethod]
         public void GetByIdFaultTest()
         {
-            this.GetByIdFaultTest(OrdersServiceBaseAddressIIS);
+            this.BaseGetByIdFaultTest();
         }
 
         [TestMethod]
         public void GetByIdTest()
         {
-            this.GetByIdTest(OrdersServiceBaseAddressIIS);
+            this.BaseGetByIdTest();
         }
     }
 }
