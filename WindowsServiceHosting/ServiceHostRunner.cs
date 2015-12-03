@@ -3,7 +3,6 @@
     using System;
     using System.ServiceModel;
     using System.Threading;
-
     using WindowsServiceHosting.Loggers;
 
     public class ServiceHostRunner
@@ -94,6 +93,7 @@
             }
             catch (CommunicationException)
             {
+                this.WriteError(string.Format("An error occured on closing host for {0} service.", host.Description.ServiceType));
                 host.Abort();
             }
 

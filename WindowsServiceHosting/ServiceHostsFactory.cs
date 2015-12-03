@@ -53,11 +53,11 @@
         {
             var ordersServiceBaseAddress = new Uri("http://epruizhw0228:8733/Design_Time_Addresses/NorthwindWCFServices/OrdersService/");
 
-            var host = new WebServiceHost(typeof(OrdersService), ordersServiceBaseAddress);
+            var host = new WebServiceHost(typeof(RESTOrdersService), ordersServiceBaseAddress);
 
             var serviceEndpoint = host.AddServiceEndpoint(typeof(IRestOrdersService), new WebHttpBinding(), "rest");
 
-            serviceEndpoint.Behaviors.Add(new WebHttpBehavior { HelpEnabled = true, DefaultOutgoingResponseFormat = WebMessageFormat.Json });
+            serviceEndpoint.Behaviors.Add(new WebHttpBehavior { HelpEnabled = true, DefaultOutgoingResponseFormat = WebMessageFormat.Json, DefaultOutgoingRequestFormat = WebMessageFormat.Json });
 
             return host;
         }
