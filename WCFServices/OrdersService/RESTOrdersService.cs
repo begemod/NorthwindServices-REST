@@ -1,5 +1,6 @@
 ﻿namespace WCFServices.OrdersService
 {
+    using System;
     using System.Collections.Generic;
     using System.Net;
     using System.ServiceModel.Web;
@@ -63,6 +64,31 @@
             }
         }
 
+        public void ProcessOrder(string id, string status)
+        {
+            int orderId = 0;
+
+            int.TryParse(id, out orderId);
+
+            try
+            {
+                var processAction = this.GetProcessAction(status);
+
+                if (processAction != null)
+                {
+                    processAction(orderId);
+                }
+            }
+            catch (BusinessException)
+            {
+                throw new WebFaultException(HttpStatusCode.InternalServerError);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
+        }
+
         public void UpdateOrder(OrderDTO order)
         {
             try
@@ -77,6 +103,33 @@
             {
                 throw new WebFaultException(HttpStatusCode.NotFound);
             }
+        }
+
+        private Action<int> GetProcessAction(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                throw new WebFaultException(HttpStatusCode.MethodNotAllowed);
+            }
+
+            OrderState orderState;
+
+            if (!Enum.TryParse(status, true, out orderState))
+            {
+                throw new WebFaultException(HttpStatusCode.MethodNotAllowed);
+            }
+
+            if (orderState == OrderState.InWork)
+            {
+                return this.Process;
+            }
+
+            if (orderState == OrderState.Closed)
+            {
+                return this.Close;
+            }
+
+            return null;
         }
     }
 }

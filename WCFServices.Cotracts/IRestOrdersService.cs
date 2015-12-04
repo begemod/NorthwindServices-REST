@@ -22,5 +22,8 @@
 
         [WebInvoke(UriTemplate = "orders", Method = "PUT")]
         void UpdateOrder(OrderDTO order);
+
+        [WebInvoke(UriTemplate = "orders?id={id}&status={status}", Method = "PUT")]
+        void ProcessOrder(string id, string status);
     }
 }

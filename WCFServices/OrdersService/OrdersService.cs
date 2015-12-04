@@ -1,14 +1,8 @@
 ﻿namespace WCFServices.OrdersService
 {
-    using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.ServiceModel;
     using System.Threading;
-    using System.Threading.Tasks;
-    using AutoMapper;
-    using DAL.Entities;
     using DAL.Infrastructure;
     using WCFServices.Cotracts;
     using WCFServices.DataContracts;
@@ -17,8 +11,6 @@
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
     public class OrdersService : BaseOrdersService, IOrdersService, IOrdersSubscriptionService
     {
-        private static readonly ConcurrentDictionary<string, IBroadcastCallback> Callbacks = new ConcurrentDictionary<string, IBroadcastCallback>();
-
         #region IOrdersService members
 
         public IEnumerable<OrderDTO> GetAll()
@@ -70,26 +62,11 @@
         {
             try
             {
-                var sourceOrder = DataService.GetById(orderId);
-
-                if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
-                {
-                    throw new FaultException(new FaultReason("Only Order in New status can be processed to InWork state."), new FaultCode("Error"));
-                }
-
-                var orderDate = DateTime.Now;
-
-                if (sourceOrder.RequiredDate < orderDate)
-                {
-                    throw new FaultException(new FaultReason("Order's Required Date is expired."), new FaultCode("Error"));
-                }
-
-                sourceOrder.OrderDate = orderDate;
-
-                DataService.UpdateOrder(sourceOrder);
-
-                // raise on order status changed event
-                this.OnOrderStatusChanged(orderId);
+                this.Process(orderId);
+            }
+            catch (BusinessException exception)
+            {
+                throw new FaultException(exception.Message, new FaultCode("Error"));
             }
             catch (EntityNotFoundException exception)
             {
@@ -101,19 +78,11 @@
         {
             try
             {
-                var sourceOrder = DataService.GetById(orderId);
-
-                if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.InWork))
-                {
-                    throw new FaultException(new FaultReason("Only Order in InWork status can be closed."), new FaultCode("Error"));
-                }
-
-                sourceOrder.ShippedDate = DateTime.Now;
-
-                DataService.UpdateOrder(sourceOrder);
-
-                // raise on order status changed event
-                this.OnOrderStatusChanged(orderId);
+                this.Close(orderId);
+            }
+            catch (BusinessException exception)
+            {
+                throw new FaultException(new FaultReason(exception.Message), new FaultCode("Error"));
             }
             catch (EntityNotFoundException exception)
             {
@@ -179,35 +148,5 @@
         }
 
         #endregion
-
-        private void OnOrderStatusChanged(int orderId)
-        {
-            Task.Factory.StartNew(() =>
-                {
-                    var clientKeys = Callbacks.Keys.ToArray();
-                    foreach (var clientKey in clientKeys)
-                    {
-                        IBroadcastCallback callback;
-                        if (Callbacks.TryGetValue(clientKey, out callback))
-                        {
-                            if (callback != null)
-                            {
-                                try
-                                {
-                                    callback.OrderStatusIsChanged(orderId);
-                                }
-                                catch (TimeoutException)
-                                {
-                                    // suppose that connection to client has been lost
-                                    // and callback should be removed from list
-                                    IBroadcastCallback faultedCallback;
-                                    var faultedClientId = clientKey;
-                                    Callbacks.TryRemove(faultedClientId, out faultedCallback);
-                                }
-                            }
-                        }
-                    }
-                });
-        }
     }
 }

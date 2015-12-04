@@ -1,19 +1,26 @@
 ﻿namespace WCFServices.OrdersService
 {
+    using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.ServiceModel;
+    using System.Threading.Tasks;
 
     using AutoMapper;
     using DAL.DataServices;
     using DAL.Entities;
     using DAL.Infrastructure;
+
+    using WCFServices.Cotracts;
     using WCFServices.Cotracts.DataContracts;
     using WCFServices.DataContracts;
     using WCFServices.Infrastructure;
 
     public class BaseOrdersService
     {
+        protected static readonly ConcurrentDictionary<string, IBroadcastCallback> Callbacks = new ConcurrentDictionary<string, IBroadcastCallback>();
+
         private OrdersDataService ordersDataService;
 
         protected BaseOrdersService()
@@ -99,6 +106,77 @@
             orderEntity.ShippedDate = sourceOrder.ShippedDate;
 
             this.DataService.UpdateOrder(orderEntity);
+        }
+
+        protected void Process(int orderId)
+        {
+            var sourceOrder = this.DataService.GetById(orderId);
+
+            if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.New))
+            {
+                throw new BusinessException("Only Order in New status can be processed to InWork state.");
+            }
+
+            var orderDate = DateTime.Now;
+
+            if (sourceOrder.RequiredDate < orderDate)
+            {
+                throw new BusinessException("Order's Required Date is expired.");
+            }
+
+            sourceOrder.OrderDate = orderDate;
+
+            this.DataService.UpdateOrder(sourceOrder);
+
+            // raise on order status changed event
+            this.OnOrderStatusChanged(orderId);
+        }
+
+        protected void Close(int orderId)
+        {
+            var sourceOrder = this.DataService.GetById(orderId);
+
+            if (!Mapper.Map<Order, OrderDTO>(sourceOrder).OrderState.Equals(OrderState.InWork))
+            {
+                throw new BusinessException("Only Order in InWork status can be closed.");
+            }
+
+            sourceOrder.ShippedDate = DateTime.Now;
+
+            this.DataService.UpdateOrder(sourceOrder);
+
+            // raise on order status changed event
+            this.OnOrderStatusChanged(orderId);
+        }
+
+        protected void OnOrderStatusChanged(int orderId)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                var clientKeys = Callbacks.Keys.ToArray();
+                foreach (var clientKey in clientKeys)
+                {
+                    IBroadcastCallback callback;
+                    if (Callbacks.TryGetValue(clientKey, out callback))
+                    {
+                        if (callback != null)
+                        {
+                            try
+                            {
+                                callback.OrderStatusIsChanged(orderId);
+                            }
+                            catch (TimeoutException)
+                            {
+                                // suppose that connection to client has been lost
+                                // and callback should be removed from list
+                                IBroadcastCallback faultedCallback;
+                                var faultedClientId = clientKey;
+                                Callbacks.TryRemove(faultedClientId, out faultedCallback);
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         #region Setup mapping
