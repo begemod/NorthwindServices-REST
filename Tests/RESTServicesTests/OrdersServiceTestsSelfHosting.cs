@@ -27,5 +27,17 @@
         {
             this.BaseGetByIdTest();
         }
+
+        [TestMethod]
+        public void DeleteFaultTest()
+        {
+            this.BaseDeleteFaultTest();
+        }
+
+        [TestMethod]
+        public void DeleteTest()
+        {
+            this.BaseDeleteTest();
+        }
     }
 }

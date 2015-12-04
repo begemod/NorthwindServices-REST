@@ -11,13 +11,26 @@
 
     public class BaseRestOrdersServiceTests
     {
+        private IEnumerable<OrderDTO> allOrders;
+
         protected string BaseServiceAddress { get; set; }
+
+        private IEnumerable<OrderDTO> AllOrders
+        {
+            get
+            {
+                return this.allOrders ?? (this.allOrders = this.GetAllOrders());
+            }
+        }
 
         #region Tests
 
         protected void BaseGetAllTest()
         {
-            var response = this.GetAllOrders();
+            var client = new RestClient(this.BaseServiceAddress);
+
+            var request = new RestRequest("orders", Method.GET);
+            var response = client.Execute(request);
 
             Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
@@ -33,9 +46,7 @@
 
         protected void BaseGetByIdTest()
         {
-            var orders = this.GetAllOrders().Deserialize<IEnumerable<OrderDTO>>();
-
-            var orderId = orders.First().OrderId;
+            var orderId = this.GetOrder().OrderId;
 
             var response = this.GetOrderById(orderId.ToString());
 
@@ -43,17 +54,28 @@
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
         }
 
-        protected void BaseCreateNewOrderTest()
+        protected void BaseDeleteFaultTest()
         {
             var client = new RestClient(this.BaseServiceAddress);
 
-            var newOrder = this.CreateNewOrder();
+            var request = new RestRequest("orders/{id}", Method.DELETE);
+            request.AddUrlSegment("id", Guid.NewGuid().ToString());
 
-            var request = new RestRequest("orders", Method.POST) { RequestFormat = DataFormat.Json };
+            var response = client.Execute(request);
 
-            var objSer = JsonConvert.SerializeObject(newOrder);
+            Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.NotFound);
+        }
 
-            request.AddBody(newOrder);
+        protected void BaseDeleteTest()
+        {
+            var client = new RestClient(this.BaseServiceAddress);
+
+            var request = new RestRequest("orders/{id}", Method.DELETE);
+
+            var orderNotInCloseState = this.GetOrder(o => o.OrderState != OrderState.Closed);
+
+            request.AddUrlSegment("id", orderNotInCloseState.OrderId.ToString());
 
             var response = client.Execute(request);
 
@@ -76,35 +98,23 @@
             return client.Execute(request);
         }
 
-        private IRestResponse GetAllOrders()
+        private IEnumerable<OrderDTO> GetAllOrders()
         {
             var client = new RestClient(this.BaseServiceAddress);
 
             var request = new RestRequest("orders", Method.GET);
 
-            return client.Execute(request);
+            return client.Execute(request).Deserialize<IEnumerable<OrderDTO>>();
         }
 
-        private OrderDTO CreateNewOrder()
+        private OrderDTO GetOrder(Func<OrderDTO, bool> predicate = null)
         {
-            var order = this.GetExistingOrder();
-
-            order.OrderId = 0;
-            order.RequiredDate = DateTime.Now.AddDays(1);
-
-            return order;
-        }
-
-        private OrderDTO GetExistingOrder(Func<OrderDTO, bool> predicate = null)
-        {
-            var allOrders = this.GetAllOrders().Deserialize<IEnumerable<OrderDTO>>();
-
             predicate = predicate ?? (dto => true);
 
-            return allOrders.First(predicate);
+            return this.AllOrders.First(predicate);
         }
 
-    #endregion
+        #endregion
     }
 
     internal static class RestResponseExtensions
