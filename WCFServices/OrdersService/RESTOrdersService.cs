@@ -74,10 +74,12 @@
             {
                 var processAction = this.GetProcessAction(status);
 
-                if (processAction != null)
+                if (processAction == null)
                 {
-                    processAction(orderId);
+                    throw new WebFaultException(HttpStatusCode.InternalServerError);
                 }
+
+                processAction.Invoke(orderId);
             }
             catch (BusinessException)
             {

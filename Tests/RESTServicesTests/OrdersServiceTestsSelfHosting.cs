@@ -39,5 +39,11 @@
         {
             this.BaseDeleteTest();
         }
+
+        [TestMethod]
+        public void ProcessOrderTest()
+        {
+            this.BaseProcessOrderTest();
+        }
     }
 }

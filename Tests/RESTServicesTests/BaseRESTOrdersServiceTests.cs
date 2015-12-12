@@ -83,6 +83,23 @@
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
         }
 
+        protected void BaseProcessOrderTest()
+        {
+            var client = new RestClient(this.BaseServiceAddress);
+
+            var request = new RestRequest("orders?id={id}&status={status}", Method.PUT);
+
+            var orderInNewStatus = this.GetOrder(o => o.OrderState == OrderState.New && o.RequiredDate > DateTime.Now);
+
+            request.AddUrlSegment("id", orderInNewStatus.OrderId.ToString());
+            request.AddUrlSegment("status", OrderState.InWork.ToString());
+
+            var response = client.Execute(request);
+
+            Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+        }
+
         #endregion
 
         #region Private methods
