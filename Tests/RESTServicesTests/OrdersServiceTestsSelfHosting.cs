@@ -45,5 +45,11 @@
         {
             this.BaseProcessOrderTest();
         }
+
+        [TestMethod]
+        public void CloseOrderTest()
+        {
+            this.BaseCloseOrderTest();
+        }
     }
 }

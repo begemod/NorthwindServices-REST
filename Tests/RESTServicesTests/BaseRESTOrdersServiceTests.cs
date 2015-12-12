@@ -98,6 +98,33 @@
 
             Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            var processedOrder = this.GetOrderById(orderInNewStatus.OrderId.ToString())
+                                     .Deserialize<OrderDTO>();
+
+            Assert.IsTrue(processedOrder.OrderState == OrderState.InWork);
+        }
+
+        protected void BaseCloseOrderTest()
+        {
+            var client = new RestClient(this.BaseServiceAddress);
+
+            var request = new RestRequest("orders?id={id}&status={status}", Method.PUT);
+
+            var orderInWorkStatus = this.GetOrder(o => o.OrderState == OrderState.InWork);
+
+            request.AddUrlSegment("id", orderInWorkStatus.OrderId.ToString());
+            request.AddUrlSegment("status", OrderState.Closed.ToString());
+
+            var response = client.Execute(request);
+
+            Assert.IsTrue(response.ResponseStatus == ResponseStatus.Completed);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            var closedOrder = this.GetOrderById(orderInWorkStatus.OrderId.ToString())
+                                  .Deserialize<OrderDTO>();
+
+            Assert.IsTrue(closedOrder.OrderState == OrderState.Closed);
         }
 
         #endregion
