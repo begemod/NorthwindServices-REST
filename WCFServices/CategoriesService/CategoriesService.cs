@@ -16,20 +16,9 @@
 
         public Stream GetCategoryImage(string categoryName)
         {
-            if (string.IsNullOrWhiteSpace(categoryName))
-            {
-                return null;
-            }
-
             try
             {
-                var category = this.DataService.GetByCategoryName(categoryName);
-
-                var categoryImage = category.Picture;
-
-                var imageStream = new MemoryStream(categoryImage, 78, categoryImage.Length - 78);
-
-                return imageStream;
+                return this.GetImage(categoryName);
             }
             catch (EntityNotFoundException exception)
             {
