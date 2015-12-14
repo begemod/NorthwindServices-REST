@@ -7,7 +7,7 @@
     [ServiceContract(Namespace = "http://epam.com/NorthwindService")]
     public interface IRESTCategoriesService
     {
-        [WebGet(UriTemplate = "categories")]
+        [WebGet(UriTemplate = "categories/names")]
         IEnumerable<string> GetCategoryNames();
     }
 }
