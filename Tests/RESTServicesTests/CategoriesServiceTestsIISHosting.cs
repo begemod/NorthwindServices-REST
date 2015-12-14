@@ -15,5 +15,11 @@
         {
             this.BaseGetCategoryNamesTest();
         }
+
+        [TestMethod]
+        public void GetCategoryImageTest()
+        {
+            this.BaseGetCategoryImageTest();
+        }
     }
 }
