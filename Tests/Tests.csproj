@@ -72,6 +72,7 @@
     <Compile Include="IISHostingServicesTests\CategoriesServiceTests.cs" />
     <Compile Include="IISHostingServicesTests\OrdersServiceTests.cs" />
     <Compile Include="RESTServicesTests\OrdersServiceTestsSelfHosting.cs" />
+    <Compile Include="RESTServicesTests\RestResponseExtensions.cs" />
     <Compile Include="SelfHostingServiceTests\CategoriesServiceTests.cs" />
     <Compile Include="SelfHostingServiceTests\OrdersServiceTests.cs" />
   </ItemGroup>
