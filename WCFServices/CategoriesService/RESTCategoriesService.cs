@@ -26,11 +26,11 @@
             }
         }
 
-        public void SaveCategoryImage(string categoryName, Stream image)
+        public void SaveCategoryImage(string categoryName, Stream categoryImage)
         {
             try
             {
-                this.SaveImage(categoryName, image);
+                this.SaveImage(categoryName, categoryImage);
             }
             catch (EntityNotFoundException)
             {

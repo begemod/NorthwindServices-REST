@@ -15,6 +15,6 @@
         Stream GetCategoryImage(string categoryName);
 
         [WebInvoke(UriTemplate = "/categories/image/{categoryName}", Method = "PUT")]
-        void SaveCategoryImage(string categoryName, Stream image);
+        void SaveCategoryImage(string categoryName, Stream categoryImage);
     }
 }
