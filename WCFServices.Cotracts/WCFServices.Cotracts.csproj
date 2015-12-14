@@ -51,6 +51,7 @@
     <Compile Include="ICategoriesService.cs" />
     <Compile Include="IOrdersService.cs" />
     <Compile Include="IOrdersSubscriptionService.cs" />
+    <Compile Include="IRESTCategoriesService.cs" />
     <Compile Include="IRestOrdersService.cs" />
     <Compile Include="IRestOrdersSubscriptionService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

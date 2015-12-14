@@ -58,7 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CategoriesService\BaseCategoriesService.cs" />
     <Compile Include="CategoriesService\CategoriesService.cs" />
+    <Compile Include="CategoriesService\RESTCategoriesService.cs" />
     <Compile Include="Infrastructure\BusinessException.cs" />
     <Compile Include="OrdersService\BaseOrdersService.cs" />
     <Compile Include="OrdersService\OrdersService.cs" />

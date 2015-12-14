@@ -3,24 +3,15 @@
     using System.Collections.Generic;
     using System.IO;
     using System.ServiceModel;
-    using DAL.DataServices;
     using DAL.Infrastructure;
     using WCFServices.Cotracts;
     using WCFServices.DataContracts;
 
-    public class CategoriesService : ICategoriesService
+    public class CategoriesService : BaseCategoriesService, ICategoriesService
     {
-        private readonly CategoriesDataService categoriesDataService;
-
-        public CategoriesService()
-        {
-            var connectionFactory = new NortwindDbConnectionFactory();
-            this.categoriesDataService = new CategoriesDataService(connectionFactory);
-        }
-
         public IEnumerable<string> GetCategoryNames()
         {
-            return this.categoriesDataService.GetCategoryNames();
+            return this.GetNames();
         }
 
         public Stream GetCategoryImage(string categoryName)
@@ -32,7 +23,7 @@
 
             try
             {
-                var category = this.categoriesDataService.GetByCategoryName(categoryName);
+                var category = this.DataService.GetByCategoryName(categoryName);
 
                 var categoryImage = category.Picture;
 
@@ -68,10 +59,10 @@
                 readed = sendingCategory.CategoryImage.Read(buffer, 0, BuffSize);
             }
 
-            var sourceCategory = this.categoriesDataService.GetByCategoryName(sendingCategory.CategoryName);
+            var sourceCategory = this.DataService.GetByCategoryName(sendingCategory.CategoryName);
             sourceCategory.Picture = memoryStream.ToArray();
 
-            this.categoriesDataService.UpdateCategoryPicture(sourceCategory);
+            this.DataService.UpdateCategoryPicture(sourceCategory);
         }
 
         private void Validate(SendingCategory category)
@@ -83,7 +74,7 @@
 
             try
             {
-                 this.categoriesDataService.GetByCategoryName(category.CategoryName);
+                 this.DataService.GetByCategoryName(category.CategoryName);
             }
             catch (EntityNotFoundException exception)
             {
