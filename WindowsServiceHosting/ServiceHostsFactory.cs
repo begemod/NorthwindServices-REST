@@ -5,6 +5,8 @@
     using System.ServiceModel;
     using System.ServiceModel.Description;
     using System.ServiceModel.Web;
+
+    using WCFServices.CategoriesService;
     using WCFServices.Cotracts;
     using WCFServices.HostConfigurationFactory;
     using WCFServices.OrdersService;
@@ -27,7 +29,8 @@
                        {
                            GetOrdersServiceHost(),
                            GetCategoriesServiceHost(),
-                           GetWebServiceHostForOrdersService()
+                           GetWebServiceHostForOrdersService(),
+                           GetWebServiceHostForCategoriesService()
                        };
         }
 
@@ -56,6 +59,19 @@
             var host = new WebServiceHost(typeof(RESTOrdersService), ordersServiceBaseAddress);
 
             var serviceEndpoint = host.AddServiceEndpoint(typeof(IRestOrdersService), new WebHttpBinding(), "rest");
+
+            serviceEndpoint.Behaviors.Add(new WebHttpBehavior { HelpEnabled = true, DefaultOutgoingResponseFormat = WebMessageFormat.Json, DefaultOutgoingRequestFormat = WebMessageFormat.Json });
+
+            return host;
+        }
+
+        private static ServiceHost GetWebServiceHostForCategoriesService()
+        {
+            var categoriesServiceBaseAddress = new Uri("http://epruizhw0228:8733/Design_Time_Addresses/NorthwindWCFServices/CategoriesService/");
+
+            var host = new WebServiceHost(typeof(RESTCategoriesService), categoriesServiceBaseAddress);
+
+            var serviceEndpoint = host.AddServiceEndpoint(typeof(IRESTCategoriesService), new WebHttpBinding(), "rest");
 
             serviceEndpoint.Behaviors.Add(new WebHttpBehavior { HelpEnabled = true, DefaultOutgoingResponseFormat = WebMessageFormat.Json, DefaultOutgoingRequestFormat = WebMessageFormat.Json });
 
