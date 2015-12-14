@@ -13,5 +13,8 @@
 
         [WebGet(UriTemplate = "/categories/image/{categoryName}")]
         Stream GetCategoryImage(string categoryName);
+
+        [WebInvoke(UriTemplate = "/categories/image/{categoryName}", Method = "PUT")]
+        void SaveCategoryImage(string categoryName, Stream image);
     }
 }

@@ -43,5 +43,26 @@
 
             return imageStream;
         }
+
+        protected void SaveImage(string categoryName, Stream categoryImage)
+        {
+            const int BuffSize = 1000;
+
+            var buffer = new byte[BuffSize];
+            var memoryStream = new MemoryStream();
+
+            var readed = categoryImage.Read(buffer, 0, BuffSize);
+
+            while (readed != 0)
+            {
+                memoryStream.Write(buffer, 0, readed);
+                readed = categoryImage.Read(buffer, 0, BuffSize);
+            }
+
+            var sourceCategory = this.DataService.GetByCategoryName(categoryName);
+            sourceCategory.Picture = memoryStream.ToArray();
+
+            this.DataService.UpdateCategoryPicture(sourceCategory);
+        }
     }
 }

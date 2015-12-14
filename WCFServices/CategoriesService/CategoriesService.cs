@@ -28,42 +28,9 @@
 
         public void SaveCategoryImage(SendingCategory sendingCategory)
         {
-            const int BuffSize = 1000;
-
-            if (sendingCategory == null)
-            {
-                return;
-            }
-
-            this.Validate(sendingCategory);
-
-            var buffer = new byte[BuffSize];
-            var memoryStream = new MemoryStream();
-
-            var readed = sendingCategory.CategoryImage.Read(buffer, 0, BuffSize);
-
-            while (readed != 0)
-            {
-                memoryStream.Write(buffer, 0, readed);
-                readed = sendingCategory.CategoryImage.Read(buffer, 0, BuffSize);
-            }
-
-            var sourceCategory = this.DataService.GetByCategoryName(sendingCategory.CategoryName);
-            sourceCategory.Picture = memoryStream.ToArray();
-
-            this.DataService.UpdateCategoryPicture(sourceCategory);
-        }
-
-        private void Validate(SendingCategory category)
-        {
-            if (string.IsNullOrWhiteSpace(category.CategoryName))
-            {
-                throw new FaultException(new FaultReason("Category name is not defined."), new FaultCode("Error"));
-            }
-
             try
             {
-                 this.DataService.GetByCategoryName(category.CategoryName);
+                this.SaveImage(sendingCategory.CategoryName, sendingCategory.CategoryImage);
             }
             catch (EntityNotFoundException exception)
             {

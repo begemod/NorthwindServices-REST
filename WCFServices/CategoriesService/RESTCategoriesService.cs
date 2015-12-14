@@ -25,5 +25,17 @@
                 throw new WebFaultException(HttpStatusCode.NotFound);
             }
         }
+
+        public void SaveCategoryImage(string categoryName, Stream image)
+        {
+            try
+            {
+                this.SaveImage(categoryName, image);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
+        }
     }
 }
