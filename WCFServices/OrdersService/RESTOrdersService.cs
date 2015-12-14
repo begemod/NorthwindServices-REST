@@ -9,7 +9,7 @@
     using WCFServices.DataContracts;
     using WCFServices.Infrastructure;
 
-    public class RESTOrdersService : BaseOrdersService, IRestOrdersService, IRestOrdersSubscriptionService
+    public class RESTOrdersService : BaseOrdersService, IRestOrdersService
     {
         #region IRestOrdersService members
 
@@ -107,30 +107,6 @@
             {
                 throw new WebFaultException(HttpStatusCode.NotFound);
             }
-        }
-
-        #endregion
-
-        #region IRestOrdersSubscriptionService members
-
-        public bool Subscribe(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool Unsubscribe(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return false;
-            }
-
-            return true;
         }
 
         #endregion
