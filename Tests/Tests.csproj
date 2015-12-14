@@ -66,6 +66,7 @@
     <Compile Include="RESTServicesTests\BaseRESTCategoriesServiceTests.cs" />
     <Compile Include="RESTServicesTests\BaseRESTOrdersServiceTests.cs" />
     <Compile Include="RESTServicesTests\CategoriesServiceTestsIISHosting.cs" />
+    <Compile Include="RESTServicesTests\CategoriesServiceTestsSelfHosting.cs" />
     <Compile Include="RESTServicesTests\OrdersServiceTestsIISHosting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IISHostingServicesTests\CategoriesServiceTests.cs" />
