@@ -21,5 +21,11 @@
         {
             this.BaseGetCategoryImageTest();
         }
+
+        [TestMethod]
+        public void SaveCategoryImageTest()
+        {
+            this.BaseSaveCategoryImageTest();
+        }
     }
 }
