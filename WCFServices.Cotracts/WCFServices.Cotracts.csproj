@@ -52,6 +52,7 @@
     <Compile Include="IOrdersService.cs" />
     <Compile Include="IOrdersSubscriptionService.cs" />
     <Compile Include="IRestOrdersService.cs" />
+    <Compile Include="IRestOrdersSubscriptionService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

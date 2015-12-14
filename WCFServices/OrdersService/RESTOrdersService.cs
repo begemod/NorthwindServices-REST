@@ -9,8 +9,10 @@
     using WCFServices.DataContracts;
     using WCFServices.Infrastructure;
 
-    public class RESTOrdersService : BaseOrdersService, IRestOrdersService
+    public class RESTOrdersService : BaseOrdersService, IRestOrdersService, IRestOrdersSubscriptionService
     {
+        #region IRestOrdersService members
+
         public IEnumerable<OrderDTO> GetAll()
         {
             return this.GetAllOrders();
@@ -107,6 +109,34 @@
             }
         }
 
+        #endregion
+
+        #region IRestOrdersSubscriptionService members
+
+        public bool Subscribe(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool Unsubscribe(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region Private methods
+
         private Action<int> GetProcessAction(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
@@ -133,5 +163,7 @@
 
             return null;
         }
+
+        #endregion
     }
 }
