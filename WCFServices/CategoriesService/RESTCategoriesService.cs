@@ -1,14 +1,13 @@
 ﻿namespace WCFServices.CategoriesService
 {
-    using System;
     using System.Collections.Generic;
     using WCFServices.Cotracts;
 
-    public class RESTCategoriesService : IRESTCategoriesService
+    public class RESTCategoriesService : BaseCategoriesService, IRESTCategoriesService
     {
         public IEnumerable<string> GetCategoryNames()
         {
-            throw new NotImplementedException();
+            return this.GetNames();
         }
     }
 }

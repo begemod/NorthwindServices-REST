@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CategoriesService.svc" />
+    <Content Include="CategoriesServiceREST.svc" />
     <Content Include="OrdersService.svc" />
     <Content Include="OrdersServiceREST.svc" />
     <Content Include="Web.config" />

@@ -24,7 +24,7 @@
 
         protected IEnumerable<string> GetNames()
         {
-            return this.categoriesDataService.GetCategoryNames();
+            return this.DataService.GetCategoryNames();
         }
     }
 }
